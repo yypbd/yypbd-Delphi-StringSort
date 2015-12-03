@@ -81,6 +81,7 @@ end;
 
 procedure TFormStringSortTest.FormCreate(Sender: TObject);
 begin
+  Caption := Application.Title;
   PageControlMain.ActivePageIndex := 0;
   InitData;
 end;

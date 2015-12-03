@@ -15,6 +15,7 @@ begin
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
+  Application.Title := 'String Sort Example';
   Application.CreateForm(TFormStringSortTest, FormStringSortTest);
   Application.Run;
 end.
