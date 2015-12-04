@@ -3,17 +3,31 @@ unit Sort.StringCompare;
 interface
 
 uses
-  Windows, SysUtils, Classes;
+  Windows, SysUtils, Classes, ComCtrls;
 
   function NaturalOrderCompareString( const A1, A2: string; ACaseSensitive: Boolean ): Integer;
   function StrCmpLogicalW(psz1, psz2: PWideChar): Integer; stdcall; external 'shlwapi.dll';
 
 type
-  TStringSortCompare = record
+  TStringListSortCompare = record
     class function DoNatural(List: TStringList; Index1, Index2: Integer): Integer; static;
     class function DoCompareStr(List: TStringList; Index1, Index2: Integer): Integer; static;
     class function DoWinAPI(List: TStringList; Index1, Index2: Integer): Integer; static;
     class function DoStrCmpLogicalW(List: TStringList; Index1, Index2: Integer): Integer; static;
+  end;
+
+  TStringListSortCompareDesc = record
+    class function DoNatural(List: TStringList; Index1, Index2: Integer): Integer; static;
+    class function DoCompareStr(List: TStringList; Index1, Index2: Integer): Integer; static;
+    class function DoWinAPI(List: TStringList; Index1, Index2: Integer): Integer; static;
+    class function DoStrCmpLogicalW(List: TStringList; Index1, Index2: Integer): Integer; static;
+  end;
+
+  PGroupSortData = ^TGroupSortData;
+  TGroupSortData = record
+    ListView: TListview;
+    ColumnIndex: Integer;
+    Ascend: Boolean;
   end;
 
 implementation
@@ -117,27 +131,27 @@ begin
   end;
 end;
 
-{ TStringSortCompare }
+{ TStringListSortCompare }
 
-class function TStringSortCompare.DoCompareStr(List: TStringList; Index1,
+class function TStringListSortCompare.DoCompareStr(List: TStringList; Index1,
   Index2: Integer): Integer;
 begin
   Result := CompareStr( List.Strings[Index1], List.Strings[Index2] );
 end;
 
-class function TStringSortCompare.DoNatural(List: TStringList; Index1,
+class function TStringListSortCompare.DoNatural(List: TStringList; Index1,
   Index2: Integer): Integer;
 begin
   Result := NaturalOrderCompareString( List.Strings[Index1], List.Strings[Index2], True );
 end;
 
-class function TStringSortCompare.DoStrCmpLogicalW(List: TStringList; Index1,
+class function TStringListSortCompare.DoStrCmpLogicalW(List: TStringList; Index1,
   Index2: Integer): Integer;
 begin
   Result := StrCmpLogicalW( PWideChar(List.Strings[Index1]), PWideChar(List.Strings[Index2]) );
 end;
 
-class function TStringSortCompare.DoWinAPI(List: TStringList; Index1,
+class function TStringListSortCompare.DoWinAPI(List: TStringList; Index1,
   Index2: Integer): Integer;
 var
   CompareResult: Integer;
@@ -151,6 +165,32 @@ begin
     CSTR_GREATER_THAN:  Result := 1;
     CSTR_EQUAL:         Result := 0;
   end;
+end;
+
+{ TStringListSortCompareDesc }
+
+class function TStringListSortCompareDesc.DoCompareStr(List: TStringList;
+  Index1, Index2: Integer): Integer;
+begin
+  Result := -TStringListSortCompare.DoCompareStr( List, Index1, Index2 );
+end;
+
+class function TStringListSortCompareDesc.DoNatural(List: TStringList; Index1,
+  Index2: Integer): Integer;
+begin
+  Result := -TStringListSortCompare.DoNatural( List, Index1, Index2 );
+end;
+
+class function TStringListSortCompareDesc.DoStrCmpLogicalW(List: TStringList;
+  Index1, Index2: Integer): Integer;
+begin
+  Result := -TStringListSortCompare.DoStrCmpLogicalW( List, Index1, Index2 );
+end;
+
+class function TStringListSortCompareDesc.DoWinAPI(List: TStringList; Index1,
+  Index2: Integer): Integer;
+begin
+  Result := -TStringListSortCompare.DoWinAPI( List, Index1, Index2 );
 end;
 
 end.

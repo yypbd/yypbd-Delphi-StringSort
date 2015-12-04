@@ -13,18 +13,29 @@ type
     ButtonInitialize: TButton;
     TabSheetData: TTabSheet;
     TabSheetStringList: TTabSheet;
-    TabSheet3: TTabSheet;
+    TabSheetListView: TTabSheet;
     MemoData: TMemo;
     MemoStringList: TMemo;
     ButtonSort: TButton;
     RadioGroupSortType: TRadioGroup;
+    ListView1: TListView;
+    TabSheetListViewGroup: TTabSheet;
+    ListView2: TListView;
     procedure FormCreate(Sender: TObject);
     procedure ButtonInitializeClick(Sender: TObject);
     procedure ButtonSortClick(Sender: TObject);
+    procedure ListView1ColumnClick(Sender: TObject; Column: TListColumn);
+    procedure ListView1Compare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
   private
     { Private declarations }
+    FColumnToSort: Integer;
+    FIsDesc: Boolean;
+
     procedure InitData;
     procedure DoTestStringList;
+    procedure DoTestListView;
+    procedure DoTestListViewGroup;
   public
     { Public declarations }
   end;
@@ -35,15 +46,46 @@ var
 implementation
 
 uses
-  Sort.StringCompare;
+  CommCtrl, Sort.StringCompare;
 
 {$R *.dfm}
 
 procedure TFormStringSortTest.ButtonInitializeClick(Sender: TObject);
+var
+  I: Integer;
+  ListItem: TListItem;
+  ListGroup: TListGroup;
 begin
   case PageControlMain.ActivePageIndex of
     0: InitData;
     1: MemoStringList.Clear;
+    2:
+    begin
+      ListView1.Clear;
+      for I := 0 to MemoData.Lines.Count - 1 do
+      begin
+        ListItem := ListView1.Items.Add;
+        ListItem.Caption := MemoData.Lines.Strings[I];
+        ListItem.SubItems.Add( MemoData.Lines.Strings[I] );
+        ListItem.SubItems.Add( MemoData.Lines.Strings[I] );
+      end;
+    end;
+    3:
+    begin
+      ListView2.Clear;
+      ListView2.Items.BeginUpdate;
+      for I := 0 to MemoData.Lines.Count - 1 do
+      begin
+        ListGroup := ListView2.Groups.Add;
+        ListGroup.Header := MemoData.Lines.Strings[I];
+        ListGroup.Footer := '';
+
+        ListItem := ListView2.Items.Add;
+        ListItem.Caption := MemoData.Lines.Strings[I];
+        ListItem.GroupID := ListGroup.ID;
+      end;
+      ListView2.Items.EndUpdate;
+    end;
   end;
 end;
 
@@ -52,10 +94,62 @@ begin
   case PageControlMain.ActivePageIndex of
     0:
     begin
-
     end;
     1: DoTestStringList;
+    2: DoTestListView;
+    3: DoTestListViewGroup;
   end;
+end;
+
+procedure TFormStringSortTest.DoTestListView;
+begin
+  FColumnToSort := 0;
+  ListView1.AlphaSort;
+  FIsDesc := not FIsDesc;
+end;
+
+function ListView_GroupSort(Group1_ID: Integer; Group2_ID: Integer; pvData: Pointer): Integer; stdcall;
+var
+  GroupSortData: PGroupSortData;
+  Str1, Str2: string;
+  CompareResult: Integer;
+begin
+  Result := 0;
+  GroupSortData := PGroupSortData(pvData);
+
+  Str1 := GroupSortData.ListView.Groups.Items[Group1_ID].Header;
+  Str2 := GroupSortData.ListView.Groups.Items[Group2_ID].Header;
+
+  case FormStringSortTest.RadioGroupSortType.ItemIndex of
+    0: Result := NaturalOrderCompareString( Str1, Str2, True );
+    1: Result := CompareStr( Str1, Str2 );
+    2:
+    begin
+      CompareResult := CompareString( LOCALE_USER_DEFAULT, 0, PWideChar(Str1), Length(Str1), PWideChar(Str2), Length(Str2) );
+
+      case CompareResult of
+        CSTR_LESS_THAN:     Result := -1;
+        CSTR_GREATER_THAN:  Result := 1;
+        CSTR_EQUAL:         Result := 0;
+      end;
+    end;
+    3: Result := StrCmpLogicalW( PWideChar(Str1), PWideChar(Str2) );
+  end;
+
+  if GroupSortData.Ascend then
+    Result := -Result;
+end;
+
+procedure TFormStringSortTest.DoTestListViewGroup;
+var
+  GroupSortData: TGroupSortData;
+begin
+  GroupSortData.ListView := ListView2;
+  GroupSortData.Ascend := FIsDesc;
+
+  ListView_SortGroups( ListView2.Handle, ListView_GroupSort, @GroupSortData );
+
+  FIsDesc := not FIsDesc;
 end;
 
 procedure TFormStringSortTest.DoTestStringList;
@@ -66,12 +160,26 @@ begin
   try
     StringList.Assign( MemoData.Lines );
 
-    case RadioGroupSortType.ItemIndex of
-      0: StringList.CustomSort( TStringSortCompare.DoNatural );
-      1: StringList.CustomSort( TStringSortCompare.DoCompareStr );
-      2: StringList.CustomSort( TStringSortCompare.DoWinAPI );
-      3: StringList.CustomSort( TStringSortCompare.DoStrCmpLogicalW );
+    if FIsDesc then
+    begin
+      case RadioGroupSortType.ItemIndex of
+        0: StringList.CustomSort( TStringListSortCompareDesc.DoNatural );
+        1: StringList.CustomSort( TStringListSortCompareDesc.DoCompareStr );
+        2: StringList.CustomSort( TStringListSortCompareDesc.DoWinAPI );
+        3: StringList.CustomSort( TStringListSortCompareDesc.DoStrCmpLogicalW );
+      end;
+    end
+    else
+    begin
+      case RadioGroupSortType.ItemIndex of
+        0: StringList.CustomSort( TStringListSortCompare.DoNatural );
+        1: StringList.CustomSort( TStringListSortCompare.DoCompareStr );
+        2: StringList.CustomSort( TStringListSortCompare.DoWinAPI );
+        3: StringList.CustomSort( TStringListSortCompare.DoStrCmpLogicalW );
+      end;
     end;
+
+    FIsDesc := not FIsDesc;
 
     MemoStringList.Lines.Assign( StringList );
   finally
@@ -133,6 +241,54 @@ begin
   MemoData.Lines.Add( 'a - 99' );
   MemoData.Lines.Add( 'a - 9' );
   MemoData.Lines.Add( 'a - 10000' );
+end;
+
+procedure TFormStringSortTest.ListView1ColumnClick(Sender: TObject;
+  Column: TListColumn);
+begin
+  FColumnToSort := Column.Index;
+  (Sender as TCustomListView).AlphaSort;
+  FIsDesc := not FIsDesc;
+end;
+
+procedure TFormStringSortTest.ListView1Compare(Sender: TObject; Item1,
+  Item2: TListItem; Data: Integer; var Compare: Integer);
+var
+  S1, S2: string;
+  CompareResult: Integer;
+  Index: Integer;
+begin
+  if FColumnToSort = 0 then
+  begin
+    S1 := Item1.Caption;
+    S2 := Item2.Caption;
+  end
+  else
+  begin
+    Index := FColumnToSort - 1;
+
+    S1 := Item1.SubItems.Strings[Index];
+    S2 := Item2.SubItems.Strings[Index];
+  end;
+
+  case RadioGroupSortType.ItemIndex of
+    0: Compare := NaturalOrderCompareString( S1, S2, True );
+    1: Compare := CompareStr( S1, S2 );
+    2:
+    begin
+      CompareResult := CompareString( LOCALE_USER_DEFAULT, 0, PWideChar(S1), Length(S1), PWideChar(S2), Length(S2) );
+
+      case CompareResult of
+        CSTR_LESS_THAN:     Compare := -1;
+        CSTR_GREATER_THAN:  Compare := 1;
+        CSTR_EQUAL:         Compare := 0;
+      end;
+    end;
+    3: Compare := StrCmpLogicalW( PWideChar(S1), PWideChar(S2) );
+  end;
+
+  if FIsDesc then
+    Compare := -Compare;
 end;
 
 end.

@@ -19,10 +19,9 @@ object FormStringSortTest: TFormStringSortTest
     Top = 0
     Width = 647
     Height = 352
-    ActivePage = TabSheetData
+    ActivePage = TabSheetListViewGroup
     Align = alClient
     TabOrder = 0
-    ExplicitHeight = 368
     object TabSheetData: TTabSheet
       Caption = 'Data'
       ExplicitLeft = 8
@@ -54,10 +53,71 @@ object FormStringSortTest: TFormStringSortTest
         ExplicitHeight = 285
       end
     end
-    object TabSheet3: TTabSheet
-      Caption = 'TabSheet3'
+    object TabSheetListView: TTabSheet
+      Caption = 'ListView'
       ImageIndex = 2
       ExplicitHeight = 340
+      object ListView1: TListView
+        Left = 0
+        Top = 0
+        Width = 639
+        Height = 324
+        Align = alClient
+        Columns = <
+          item
+            Caption = 'Caption'
+            Width = 200
+          end
+          item
+            Caption = 'SubItem_0'
+            Width = 200
+          end
+          item
+            Caption = 'SubItem_1'
+            Width = 200
+          end>
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnColumnClick = ListView1ColumnClick
+        OnCompare = ListView1Compare
+        ExplicitLeft = 196
+        ExplicitTop = 88
+        ExplicitWidth = 250
+        ExplicitHeight = 150
+      end
+    end
+    object TabSheetListViewGroup: TTabSheet
+      Caption = 'ListViewGroup'
+      ImageIndex = 3
+      object ListView2: TListView
+        Left = 0
+        Top = 0
+        Width = 639
+        Height = 324
+        Align = alClient
+        Columns = <
+          item
+            Caption = 'Caption'
+            Width = 200
+          end
+          item
+            Caption = 'SubItem_0'
+            Width = 200
+          end
+          item
+            Caption = 'SubItem_1'
+            Width = 200
+          end>
+        GroupView = True
+        TabOrder = 0
+        ViewStyle = vsReport
+        OnColumnClick = ListView1ColumnClick
+        OnCompare = ListView1Compare
+        ExplicitLeft = 196
+        ExplicitTop = 88
+        ExplicitWidth = 250
+        ExplicitHeight = 150
+      end
     end
   end
   object PanelBottom: TPanel
