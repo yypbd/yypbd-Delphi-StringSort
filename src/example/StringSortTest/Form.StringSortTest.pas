@@ -30,7 +30,7 @@ type
   private
     { Private declarations }
     FColumnToSort: Integer;
-    FIsDesc: Boolean;
+    FAsc: Boolean;
 
     procedure InitData;
     procedure DoTestStringList;
@@ -105,7 +105,7 @@ procedure TFormStringSortTest.DoTestListView;
 begin
   FColumnToSort := 0;
   ListView1.AlphaSort;
-  FIsDesc := not FIsDesc;
+  FAsc := not FAsc;
 end;
 
 function ListView_GroupSort(Group1_ID: Integer; Group2_ID: Integer; pvData: Pointer): Integer; stdcall;
@@ -145,11 +145,11 @@ var
   GroupSortData: TGroupSortData;
 begin
   GroupSortData.ListView := ListView2;
-  GroupSortData.Ascend := FIsDesc;
+  GroupSortData.Ascend := FAsc;
 
   ListView_SortGroups( ListView2.Handle, ListView_GroupSort, @GroupSortData );
 
-  FIsDesc := not FIsDesc;
+  FAsc := not FAsc;
 end;
 
 procedure TFormStringSortTest.DoTestStringList;
@@ -160,7 +160,7 @@ begin
   try
     StringList.Assign( MemoData.Lines );
 
-    if FIsDesc then
+    if FAsc then
     begin
       case RadioGroupSortType.ItemIndex of
         0: StringList.CustomSort( TStringListSortCompareDesc.DoNatural );
@@ -179,7 +179,7 @@ begin
       end;
     end;
 
-    FIsDesc := not FIsDesc;
+    FAsc := not FAsc;
 
     MemoStringList.Lines.Assign( StringList );
   finally
@@ -192,6 +192,8 @@ begin
   Caption := Application.Title;
   PageControlMain.ActivePageIndex := 0;
   InitData;
+
+  FAsc := True;
 end;
 
 procedure TFormStringSortTest.InitData;
@@ -248,7 +250,7 @@ procedure TFormStringSortTest.ListView1ColumnClick(Sender: TObject;
 begin
   FColumnToSort := Column.Index;
   (Sender as TCustomListView).AlphaSort;
-  FIsDesc := not FIsDesc;
+  FAsc := not FAsc;
 end;
 
 procedure TFormStringSortTest.ListView1Compare(Sender: TObject; Item1,
@@ -287,7 +289,7 @@ begin
     3: Compare := StrCmpLogicalW( PWideChar(S1), PWideChar(S2) );
   end;
 
-  if FIsDesc then
+  if FAsc then
     Compare := -Compare;
 end;
 

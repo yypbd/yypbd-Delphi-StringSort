@@ -19,14 +19,11 @@ object FormStringSortTest: TFormStringSortTest
     Top = 0
     Width = 647
     Height = 352
-    ActivePage = TabSheetListViewGroup
+    ActivePage = TabSheetListView
     Align = alClient
     TabOrder = 0
     object TabSheetData: TTabSheet
       Caption = 'Data'
-      ExplicitLeft = 8
-      ExplicitTop = 28
-      ExplicitHeight = 340
       object MemoData: TMemo
         Left = 0
         Top = 0
@@ -35,13 +32,11 @@ object FormStringSortTest: TFormStringSortTest
         Align = alClient
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitHeight = 340
       end
     end
     object TabSheetStringList: TTabSheet
       Caption = 'StringList'
       ImageIndex = 1
-      ExplicitHeight = 340
       object MemoStringList: TMemo
         Left = 0
         Top = 0
@@ -50,13 +45,11 @@ object FormStringSortTest: TFormStringSortTest
         Align = alClient
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitHeight = 285
       end
     end
     object TabSheetListView: TTabSheet
       Caption = 'ListView'
       ImageIndex = 2
-      ExplicitHeight = 340
       object ListView1: TListView
         Left = 0
         Top = 0
@@ -80,10 +73,6 @@ object FormStringSortTest: TFormStringSortTest
         ViewStyle = vsReport
         OnColumnClick = ListView1ColumnClick
         OnCompare = ListView1Compare
-        ExplicitLeft = 196
-        ExplicitTop = 88
-        ExplicitWidth = 250
-        ExplicitHeight = 150
       end
     end
     object TabSheetListViewGroup: TTabSheet
@@ -113,10 +102,6 @@ object FormStringSortTest: TFormStringSortTest
         ViewStyle = vsReport
         OnColumnClick = ListView1ColumnClick
         OnCompare = ListView1Compare
-        ExplicitLeft = 196
-        ExplicitTop = 88
-        ExplicitWidth = 250
-        ExplicitHeight = 150
       end
     end
   end

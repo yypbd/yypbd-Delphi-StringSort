@@ -4,7 +4,9 @@ uses
   EMemLeaks,
   Vcl.Forms,
   Form.StringSortTest in 'Form.StringSortTest.pas' {FormStringSortTest},
-  Sort.StringCompare in '..\lib\Sort.StringCompare.pas';
+  Sort.StringCompare in '..\..\lib\Sort.StringCompare.pas',
+  Sort.StringList in '..\..\lib\Sort.StringList.pas',
+  Sort.ListView in '..\..\lib\Sort.ListView.pas';
 
 {$R *.res}
 
